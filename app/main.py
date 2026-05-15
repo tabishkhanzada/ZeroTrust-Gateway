@@ -1,11 +1,18 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from app.api.v1.endpoints import auth, users
 from app.core.config import settings
 from app.core.lifespan import lifespan
-import os
+from app.models.user import Base
+from app.core.database import engine
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -13,6 +20,16 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# --- Global Exception Handlers ---
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Global Error: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Internal Server Error: {str(exc)}. Please ensure PostgreSQL and Redis are running."},
+    )
+
+# --- Middleware & Mounting ---
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,7 +38,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount Frontend
 app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
 app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["auth"])
