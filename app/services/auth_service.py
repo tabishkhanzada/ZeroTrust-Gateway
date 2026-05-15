@@ -22,10 +22,12 @@ from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserCreate
 
 
+from app.core.redis import redis_client as global_redis
+
 class AuthService:
-    def __init__(self, user_repo: UserRepository, redis_client: RedisClient):
-        self.user_repo = user_repo
-        self.redis_client = redis_client
+    def __init__(self, db: AsyncSession, redis_client: RedisClient | None = None):
+        self.user_repo = UserRepository(db)
+        self.redis_client = redis_client or global_redis
 
     async def register_user(self, user_in: UserCreate) -> User:
         existing_user = await self.user_repo.get_by_email(user_in.email)

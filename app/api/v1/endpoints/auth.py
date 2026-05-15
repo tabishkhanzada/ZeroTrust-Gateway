@@ -8,6 +8,7 @@ from app.core.database import get_db
 from app.schemas.user import (
     StandardActionResponse,
     TokenExchangeResponse,
+    UserCreate,
     UserRegistrationResponse,
 )
 from app.services.auth_service import AuthService
@@ -16,7 +17,7 @@ router = APIRouter()
 
 @router.post("/register", response_model=UserRegistrationResponse)
 async def register(
-    user_in: UserRegistrationResponse,
+    user_in: UserCreate,
     db: Annotated[AsyncSession, Depends(get_db)]
 ) -> Any:
     auth_service = AuthService(db)
@@ -24,7 +25,7 @@ async def register(
 
 @router.post("/login", response_model=TokenExchangeResponse)
 async def login(
-    user_in: UserRegistrationResponse,
+    user_in: UserCreate,
     db: Annotated[AsyncSession, Depends(get_db)]
 ) -> Any:
     auth_service = AuthService(db)
@@ -36,7 +37,7 @@ async def refresh_token(
     db: Annotated[AsyncSession, Depends(get_db)]
 ) -> Any:
     auth_service = AuthService(db)
-    return await auth_service.refresh_access_token(refresh_token_in)
+    return await auth_service.refresh_tokens(refresh_token_in)
 
 @router.post("/logout", response_model=StandardActionResponse)
 async def logout(
