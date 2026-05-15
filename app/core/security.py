@@ -17,7 +17,6 @@ def create_access_token(subject: Union[str, Any], jti: str) -> str:
         "token_type": "access"
     }
     encoded_jwt = jwt.encode(to_encode, settings.ACCESS_TOKEN_SECRET_KEY, algorithm=settings.ALGORITHM)
-    print(f"DEBUG: Created Access Token for {subject}. Expires at: {expire} (TS: {int(expire.timestamp())})")
     return encoded_jwt
 
 def create_refresh_token(subject: Union[str, Any], jti: str) -> str:
@@ -31,7 +30,6 @@ def create_refresh_token(subject: Union[str, Any], jti: str) -> str:
         "token_type": "refresh"
     }
     encoded_jwt = jwt.encode(to_encode, settings.REFRESH_TOKEN_SECRET_KEY, algorithm=settings.ALGORITHM)
-    print(f"DEBUG: Created Access Token for {subject}. Expires at: {expire} (TS: {int(expire.timestamp())})")
     return encoded_jwt
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:

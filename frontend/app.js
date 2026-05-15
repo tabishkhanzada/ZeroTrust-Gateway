@@ -38,7 +38,14 @@ authForm.addEventListener('submit', async (e) => {
             body: body
         });
 
-        const data = await response.json();
+        let data;
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+            data = await response.json();
+        } else {
+            const text = await response.text();
+            throw new Error(text || 'Internal Server Error');
+        }
 
         if (!response.ok) {
             throw new Error(data.detail || 'Authentication failed');
@@ -73,6 +80,11 @@ async function showDashboard() {
         });
 
         if (!response.ok) throw new Error('Session expired');
+
+        const contentType = response.headers.get("content-type");
+        if (!contentType || contentType.indexOf("application/json") === -1) {
+            throw new Error('Server returned non-JSON response');
+        }
 
         const user = await response.json();
         userDisplay.textContent = user.email;

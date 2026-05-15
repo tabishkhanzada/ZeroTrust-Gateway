@@ -26,12 +26,11 @@ async def lifespan(app: FastAPI):
         logger.info("✅ PostgreSQL tables initialized.")
     except Exception as e:
         logger.warning(f"⚠️ PostgreSQL Error: {e}. Switching to local SQLite for 'Perfect' demo.")
-        # Emergency fallback engine
+        # Emergency fallback engine if Postgres failed at connection time
         fallback_engine = create_async_engine("sqlite+aiosqlite:///./core_auth.db")
         async with fallback_engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-        
-        # Inject fallback engine into the global state
+        # Update the global engine for the rest of the app
         from app.core import database
         database.engine = fallback_engine
         current_engine = fallback_engine
