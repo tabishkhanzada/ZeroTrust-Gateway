@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timedelta, timezone
 
 from jose import JWTError, jwt
 
@@ -89,7 +89,7 @@ class AuthService:
             jti = payload.get("jti")
             exp = payload.get("exp")
             if jti and exp:
-                now_ts = int(datetime.now(UTC).timestamp())
+                now_ts = int(datetime.now(timezone.utc).timestamp())
                 ttl = exp - now_ts
                 if ttl > 0:
                     await self.redis_client.set_with_expiry(f"blacklist:{jti}", "true", ttl)
