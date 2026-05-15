@@ -3,29 +3,31 @@ import asyncpg
 from app.core.config import settings
 
 async def create_database():
-    """
-    Attempts to connect to the default 'postgres' database and 
-    create the 'core_auth' database if it doesn't exist.
-    """
-    print("🚀 Initializing Database Setup...")
+    print("🚀 Initializing Enterprise Database Setup...")
     
-    # Parse connection string to get credentials
-    # Expected: postgresql+asyncpg://user:pass@host:port/db
-    conn_str = settings.DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
-    
-    # We need to connect to the default 'postgres' db first to create the new one
-    base_url, db_name = conn_str.rsplit('/', 1)
-    postgres_url = f"{base_url}/postgres"
+    # Extract info from settings
+    url = settings.DATABASE_URL
+    if "sqlite" in url:
+        print("✅ Using SQLite. No manual database creation needed.")
+        return
 
     try:
-        # Connect to default postgres DB
+        # Clean the URL for asyncpg
+        conn_str = url.replace("postgresql+asyncpg://", "postgresql://")
+        base_url, db_name = conn_str.rsplit('/', 1)
+        postgres_url = f"{base_url}/postgres"
+
+        # Connect to master postgres DB
         conn = await asyncpg.connect(postgres_url)
         
-        # Check if core_auth exists
+        # Check if target db exists
         exists = await conn.fetchval(f"SELECT 1 FROM pg_database WHERE datname = '{db_name}'")
         
         if not exists:
-            # We must close connection and use another one to create DB (cannot create DB inside transaction)
+            # We must close connection to create DB
+            await conn.close()
+            # Reconnect without transaction to run CREATE DATABASE
+            conn = await asyncpg.connect(postgres_url)
             await conn.execute(f"CREATE DATABASE {db_name}")
             print(f"✅ Database '{db_name}' created successfully!")
         else:
@@ -34,11 +36,8 @@ async def create_database():
         await conn.close()
         
     except Exception as e:
-        print(f"❌ Error: {e}")
-        print("\n💡 Troubleshooting Tips:")
-        print("1. Ensure PostgreSQL is installed and running.")
-        print("2. Check if your username/password in .env are correct.")
-        print("3. Ensure your user has 'Createdb' privileges.")
+        print(f"❌ Connection Error: {e}")
+        print("\n💡 Tip: Check your password in the .env file. If you don't have Postgres, the app will automatically use SQLite.")
 
 if __name__ == "__main__":
     asyncio.run(create_database())
