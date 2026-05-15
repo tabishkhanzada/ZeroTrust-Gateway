@@ -24,7 +24,10 @@ async def get_current_user(
 ) -> User:
     try:
         payload = jwt.decode(
-            token, settings.ACCESS_TOKEN_SECRET_KEY, algorithms=[settings.ALGORITHM]
+            token, 
+            settings.ACCESS_TOKEN_SECRET_KEY, 
+            algorithms=[settings.ALGORITHM],
+            options={"leeway": 30}
         )
         jti = payload.get("jti")
         if not jti:
