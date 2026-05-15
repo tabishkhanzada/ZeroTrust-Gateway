@@ -1,14 +1,13 @@
+import logging
+
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+
 from app.api.v1.endpoints import auth, users
 from app.core.config import settings
 from app.core.lifespan import lifespan
-from app.models.user import Base
-from app.core.database import engine
-import logging
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -22,11 +21,12 @@ app = FastAPI(
 
 # --- Global Exception Handlers ---
 @app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
+async def global_exception_handler(_request: Request, exc: Exception):
     logger.error(f"Global Error: {exc}", exc_info=True)
+    msg = f"Internal Server Error: {str(exc)}. Ensure DB/Redis are running."
     return JSONResponse(
         status_code=500,
-        content={"detail": f"Internal Server Error: {str(exc)}. Please ensure PostgreSQL and Redis are running."},
+        content={"detail": msg},
     )
 
 # --- Middleware & Mounting ---

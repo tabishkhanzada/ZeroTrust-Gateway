@@ -1,6 +1,7 @@
 import pytest
 from httpx import AsyncClient
 
+
 @pytest.mark.asyncio
 async def test_register_user(client: AsyncClient):
     response = await client.post(
@@ -19,7 +20,7 @@ async def test_login_success(client: AsyncClient):
         "/api/v1/auth/register",
         json={"email": "login@example.com", "password": "password123"}
     )
-    
+
     # Then login
     response = await client.post(
         "/api/v1/auth/login",
@@ -44,7 +45,7 @@ async def test_protected_route_access(client: AsyncClient):
         json={"email": email, "password": password}
     )
     token = login_res.json()["access_token"]
-    
+
     response = await client.get(
         "/api/v1/users/me",
         headers={"Authorization": f"Bearer {token}"}
@@ -65,14 +66,14 @@ async def test_logout_blacklist(client: AsyncClient):
         json={"email": email, "password": password}
     )
     token = login_res.json()["access_token"]
-    
+
     # Logout
     logout_res = await client.post(
         "/api/v1/auth/logout",
         headers={"Authorization": f"Bearer {token}"}
     )
     assert logout_res.status_code == 200
-    
+
     # Try to access protected route again with same token
     retry_res = await client.get(
         "/api/v1/users/me",

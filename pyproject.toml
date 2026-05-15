@@ -17,7 +17,23 @@ multi_line_output = 3
 [tool.ruff]
 line-length = 88
 target-version = "py312"
-select = ["E", "F", "I", "N", "W", "B", "UP", "ASYNC"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "UP",   # pyupgrade
+    "ARG",  # flake8-unused-arguments
+]
+ignore = [
+    "B008", # do not perform function call Depends in argument defaults
+    "E501", # line too long
+    "B904", # within except raise from
+]
 
 [tool.mypy]
 python_version = "3.12"

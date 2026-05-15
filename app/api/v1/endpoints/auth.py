@@ -1,55 +1,51 @@
-from typing import Any
-from fastapi import APIRouter, Depends, Body, Request
+from typing import Annotated, Any
+
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.api.dependencies.auth import get_current_user
+
+from app.api.dependencies.auth import reusable_oauth2
 from app.core.database import get_db
-from app.core.redis import redis_client
-from app.repositories.user_repository import UserRepository
-from app.services.auth_service import AuthService
 from app.schemas.user import (
-    UserCreate,
-    UserRegistrationResponse,
-    TokenExchangeResponse,
     StandardActionResponse,
+    TokenExchangeResponse,
+    UserRegistrationResponse,
 )
+from app.services.auth_service import AuthService
 
 router = APIRouter()
 
 @router.post("/register", response_model=UserRegistrationResponse)
 async def register(
-    user_in: UserCreate,
-    db: AsyncSession = Depends(get_db)
+    user_in: UserRegistrationResponse,
+    db: Annotated[AsyncSession, Depends(get_db)]
 ) -> Any:
-    user_repo = UserRepository(db)
-    auth_service = AuthService(user_repo, redis_client)
+    auth_service = AuthService(db)
     return await auth_service.register_user(user_in)
 
 @router.post("/login", response_model=TokenExchangeResponse)
 async def login(
-    email: str = Body(...),
-    password: str = Body(...),
-    db: AsyncSession = Depends(get_db)
+    user_in: UserRegistrationResponse,
+    db: Annotated[AsyncSession, Depends(get_db)]
 ) -> Any:
-    user_repo = UserRepository(db)
-    auth_service = AuthService(user_repo, redis_client)
-    return await auth_service.authenticate(email, password)
+    auth_service = AuthService(db)
+    return await auth_service.authenticate(user_in.email, user_in.password)
 
 @router.post("/refresh", response_model=TokenExchangeResponse)
-async def refresh(
-    refresh_token: str = Body(..., embed=True),
-    db: AsyncSession = Depends(get_db)
+async def refresh_token(
+    refresh_token_in: str,
+    db: Annotated[AsyncSession, Depends(get_db)]
 ) -> Any:
-    user_repo = UserRepository(db)
-    auth_service = AuthService(user_repo, redis_client)
-    return await auth_service.refresh_tokens(refresh_token)
+    auth_service = AuthService(db)
+    return await auth_service.refresh_access_token(refresh_token_in)
 
 @router.post("/logout", response_model=StandardActionResponse)
 async def logout(
-    request: Request,
-    current_user: Any = Depends(get_current_user)
+    token: Annotated[str, Depends(reusable_oauth2)],
+    db: Annotated[AsyncSession, Depends(get_db)]
 ) -> Any:
-    auth_header = request.headers.get("Authorization")
-    token = auth_header.split(" ")[1]
-    auth_service = AuthService(None, redis_client) # Repository not needed for logout blacklist
+    auth_service = AuthService(db)
     await auth_service.logout(token)
-    return {"detail": "Revocation complete"}
+    return StandardActionResponse(
+        status="success",
+        message="Session revoked successfully"
+    )

@@ -1,11 +1,13 @@
 import asyncio
+
 import pytest
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
+from app.core.config import settings
+from app.core.database import get_db
 from app.main import app
 from app.models.user import Base
-from app.core.database import get_db
-from app.core.config import settings
 
 # Test Database
 TEST_DATABASE_URL = settings.DATABASE_URL + "_test"
@@ -37,7 +39,7 @@ async def db_session():
 async def client(db_session):
     async def override_get_db():
         yield db_session
-    
+
     app.dependency_overrides[get_db] = override_get_db
     async with AsyncClient(app=app, base_url="http://test") as ac:
         yield ac

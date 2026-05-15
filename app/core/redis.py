@@ -1,6 +1,8 @@
-import redis.asyncio as redis
-from app.core.config import settings
 import logging
+
+import redis.asyncio as redis
+
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +29,7 @@ class RedisClient:
         if self.client:
             try:
                 await self.client.close()
-            except:
+            except Exception:
                 pass
 
     async def set_with_expiry(self, key: str, value: str, expiry: int):

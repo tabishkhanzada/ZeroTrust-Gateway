@@ -1,15 +1,17 @@
+import logging
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import create_async_engine
+
 from app.core.database import engine
 from app.core.redis import redis_client
 from app.models.user import Base
-import logging
 
 logger = logging.getLogger(__name__)
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI):
     # --- Redis Startup ---
     try:
         await redis_client.connect()
@@ -25,9 +27,13 @@ async def lifespan(app: FastAPI):
             await conn.run_sync(Base.metadata.create_all)
         logger.info("✅ PostgreSQL tables initialized.")
     except Exception as e:
-        logger.warning(f"⚠️ PostgreSQL Error: {e}. Switching to local SQLite for 'Perfect' demo.")
+        logger.warning(
+            f"⚠️ PostgreSQL Error: {e}. Switching to local SQLite..."
+        )
         # Emergency fallback engine if Postgres failed at connection time
-        fallback_engine = create_async_engine("sqlite+aiosqlite:///./core_auth.db")
+        fallback_engine = create_async_engine(
+            "sqlite+aiosqlite:///./core_auth.db"
+        )
         async with fallback_engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         # Update the global engine for the rest of the app
@@ -37,13 +43,13 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    # --- Shutdown ---
+    # Shutdown: Close connections
     try:
         await redis_client.disconnect()
-    except:
+    except Exception:
         pass
-        
+
     try:
         await current_engine.dispose()
-    except:
+    except Exception:
         pass

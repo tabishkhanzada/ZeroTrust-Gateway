@@ -1,6 +1,8 @@
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from app.core.config import settings
 import logging
+
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -17,8 +19,9 @@ try:
         future=True
     )
 except Exception:
-    # Fallback to local SQLite if Postgres fails
-    logger.warning("PostgreSQL connection failed. Falling back to local SQLite for 'Perfect' demo experience.")
+    logger.warning(
+        "PostgreSQL connection failed. Falling back to local SQLite."
+    )
     engine = create_async_engine("sqlite+aiosqlite:///./core_auth.db")
 
 AsyncSessionLocal = async_sessionmaker(
