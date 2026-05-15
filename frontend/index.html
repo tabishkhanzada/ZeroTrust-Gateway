@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Core - Zero-Trust Portal</title>
+    <link rel="stylesheet" href="static/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="dark-mode">
+    <div id="app">
+        <!-- Auth View -->
+        <section id="auth-view" class="view">
+            <div class="auth-container glass">
+                <div class="auth-header">
+                    <h1>Enterprise<span>Core</span></h1>
+                    <p id="auth-subtitle">Secure Asynchronous Portal</p>
+                </div>
+                
+                <div class="tabs">
+                    <button id="tab-login" class="tab active" onclick="switchAuthMode('login')">Login</button>
+                    <button id="tab-register" class="tab" onclick="switchAuthMode('register')">Register</button>
+                </div>
+
+                <form id="auth-form">
+                    <div class="input-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" required placeholder="name@company.com">
+                    </div>
+                    <div class="input-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" id="submit-btn" class="btn-primary">Authenticate</button>
+                </form>
+                <div id="auth-error" class="error-msg hidden"></div>
+            </div>
+        </section>
+
+        <!-- Dashboard View -->
+        <section id="dashboard-view" class="view hidden">
+            <nav class="glass">
+                <div class="nav-content">
+                    <div class="logo">Core<span>OS</span></div>
+                    <div class="nav-actions">
+                        <span id="user-display"></span>
+                        <button onclick="handleLogout()" class="btn-secondary">Revoke Session</button>
+                    </div>
+                </div>
+            </nav>
+
+            <main class="dashboard-grid">
+                <div class="card glass status-card">
+                    <h3>Zero-Trust Status</h3>
+                    <div class="status-indicator">
+                        <div class="pulse-ring"></div>
+                        <span id="trust-label">SECURE</span>
+                    </div>
+                    <p>Encryption: HS256 (Enterprise Grade)</p>
+                </div>
+
+                <div class="card glass token-card">
+                    <h3>Active Session</h3>
+                    <div class="token-details">
+                        <div class="detail">
+                            <span class="label">Access Token:</span>
+                            <code id="access-preview">••••••••</code>
+                        </div>
+                        <div class="detail">
+                            <span class="label">Type:</span>
+                            <code>Bearer</code>
+                        </div>
+                    </div>
+                    <button onclick="handleRefresh()" class="btn-outline">Rotate Keys</button>
+                </div>
+
+                <div class="card glass profile-card">
+                    <h3>User Context</h3>
+                    <div id="profile-data">
+                        <div class="skeleton-text"></div>
+                        <div class="skeleton-text"></div>
+                    </div>
+                </div>
+            </main>
+        </section>
+
+        <!-- Global Toast -->
+        <div id="toast" class="toast hidden"></div>
+    </div>
+    <script src="static/app.js"></script>
+</body>
+</html>
