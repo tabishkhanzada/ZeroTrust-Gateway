@@ -46,12 +46,18 @@ app/
 ### 1. Environment Setup
 Copy `.env.example` to `.env` and configure your credentials.
 
-### 2. Install Dependencies
+### 2. Automatic Database Setup
+Run the following script to automatically create the required PostgreSQL database:
+```bash
+.\venv\Scripts\python.exe init_db.py
+```
+
+### 3. Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Run the Application
+### 4. Run the Application
 ```bash
 uvicorn app.main:app --reload
 ```
