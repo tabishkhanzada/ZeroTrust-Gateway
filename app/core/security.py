@@ -7,11 +7,12 @@ from app.core.config import settings
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def create_access_token(subject: Union[str, Any], jti: str) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    now = datetime.now(timezone.utc)
+    expire = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode = {
-        "exp": expire,
+        "exp": int(expire.timestamp()),
         "sub": str(subject),
-        "iat": datetime.now(timezone.utc),
+        "iat": int(now.timestamp()),
         "jti": jti,
         "token_type": "access"
     }
@@ -19,11 +20,12 @@ def create_access_token(subject: Union[str, Any], jti: str) -> str:
     return encoded_jwt
 
 def create_refresh_token(subject: Union[str, Any], jti: str) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    now = datetime.now(timezone.utc)
+    expire = now + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
     to_encode = {
-        "exp": expire,
+        "exp": int(expire.timestamp()),
         "sub": str(subject),
-        "iat": datetime.now(timezone.utc),
+        "iat": int(now.timestamp()),
         "jti": jti,
         "token_type": "refresh"
     }

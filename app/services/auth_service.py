@@ -82,7 +82,8 @@ class AuthService:
             jti = payload.get("jti")
             exp = payload.get("exp")
             if jti and exp:
-                ttl = int(exp - datetime.now(timezone.utc).timestamp())
+                now_ts = int(datetime.now(timezone.utc).timestamp())
+                ttl = exp - now_ts
                 if ttl > 0:
                     await self.redis_client.set_with_expiry(f"blacklist:{jti}", "true", ttl)
         except JWTError:
