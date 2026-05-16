@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.redis import RedisClient
+from app.core.redis import redis_client as global_redis
 from app.core.security import (
     create_access_token,
     create_refresh_token,
@@ -22,8 +23,6 @@ from app.models.user import User
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserCreate
 
-
-from app.core.redis import redis_client as global_redis
 
 class AuthService:
     def __init__(self, db: AsyncSession, redis_client: RedisClient | None = None):
