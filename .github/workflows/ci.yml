@@ -64,4 +64,6 @@ jobs:
 
       - name: Run Async Tests with Pytest
         run: pytest app/tests/
+        env:
+          PYTHONPATH: .
 
