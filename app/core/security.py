@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from jose import jwt
@@ -9,7 +9,7 @@ from app.core.config import settings
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def create_access_token(subject: str | Any, jti: str) -> str:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     expire = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode = {
         "exp": int(expire.timestamp()),
@@ -22,7 +22,7 @@ def create_access_token(subject: str | Any, jti: str) -> str:
                       algorithm=settings.ALGORITHM)
 
 def create_refresh_token(subject: str | Any, jti: str) -> str:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     expire = now + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
     to_encode = {
         "exp": int(expire.timestamp()),
