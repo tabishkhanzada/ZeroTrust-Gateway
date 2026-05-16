@@ -1,14 +1,12 @@
-try:
-    from datetime import UTC, datetime, timedelta
-except ImportError:
-    from datetime import datetime, timedelta, timezone
-    UTC = timezone.utc
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from jose import jwt
 from passlib.context import CryptContext
 
 from app.core.config import settings
+
+UTC = getattr(datetime, "UTC", timezone.utc)  # noqa: UP017
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

@@ -1,9 +1,5 @@
 import uuid
-try:
-    from datetime import UTC, datetime
-except ImportError:
-    from datetime import datetime, timezone
-    UTC = timezone.utc
+from datetime import datetime, timezone
 
 from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,6 +22,8 @@ from app.exceptions.auth import (
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserCreate
+
+UTC = getattr(datetime, "UTC", timezone.utc)  # noqa: UP017
 
 
 class AuthService:

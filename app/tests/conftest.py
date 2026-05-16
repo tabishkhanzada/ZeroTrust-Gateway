@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 import pytest
 from httpx import AsyncClient
@@ -9,7 +10,6 @@ from app.core.database import get_db
 from app.main import app
 from app.models.user import Base
 
-import os
 # Test Database
 if os.getenv("GITHUB_ACTIONS"):
     TEST_DATABASE_URL = settings.DATABASE_URL + "_test"
