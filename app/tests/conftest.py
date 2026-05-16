@@ -12,7 +12,7 @@ from app.models.user import Base
 
 # Test Database
 if os.getenv("GITHUB_ACTIONS"):
-    TEST_DATABASE_URL = settings.DATABASE_URL + "_test"
+    TEST_DATABASE_URL = settings.DATABASE_URL
 else:
     # Use SQLite for local testing to avoid Postgres setup issues
     TEST_DATABASE_URL = "sqlite+aiosqlite:///./test.db"
