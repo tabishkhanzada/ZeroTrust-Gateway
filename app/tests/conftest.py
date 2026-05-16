@@ -19,13 +19,11 @@ else:
 
 
 
-from unittest.mock import AsyncMock, MagicMock
-from app.core.redis import RedisClient
 
 class MockRedis:
     def __init__(self):
         self.data = {}
-    async def setex(self, key, expiry, value):
+    async def setex(self, key, _expiry, value):
         self.data[key] = value
     async def get(self, key):
         return self.data.get(key)
@@ -81,20 +79,19 @@ async def db_session(db_engine):
 async def client(db_session, mock_redis):
     async def override_get_db():
         yield db_session
-    
+
     # Reset mock redis for each test
     await mock_redis.flush()
 
-    from app.core.database import get_db
     from app.core.redis import get_redis, redis_client
-    
+
     app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_redis] = lambda: mock_redis
-    
+
     # Patch the existing singleton's methods so all modules see the mock
     old_get = redis_client.get
     old_set = redis_client.set_with_expiry
-    
+
     redis_client.get = mock_redis.get
     redis_client.set_with_expiry = mock_redis.set_with_expiry
 
@@ -102,7 +99,7 @@ async def client(db_session, mock_redis):
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
         yield ac
-    
+
     redis_client.get = old_get
     redis_client.set_with_expiry = old_set
     app.dependency_overrides.clear()

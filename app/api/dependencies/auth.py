@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
-from app.core.redis import RedisClient, redis_client, get_redis
+from app.core.redis import RedisClient, get_redis
 from app.exceptions.auth import (
     TokenBlacklistedException,
     TokenExpiredException,
