@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from app.api.v1.endpoints import auth, users
+from app.api.v1.endpoints import auth, health, users
 from app.core.config import settings
 from app.core.lifespan import lifespan
 
@@ -42,6 +42,7 @@ app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
 app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["auth"])
 app.include_router(users.router, prefix=f"{settings.API_V1_STR}/users", tags=["users"])
+app.include_router(health.router, prefix=f"{settings.API_V1_STR}/system", tags=["system"])
 
 @app.get("/")
 async def root():

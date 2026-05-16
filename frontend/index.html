@@ -3,90 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enterprise Core - Zero-Trust Portal</title>
-    <link rel="stylesheet" href="static/styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>Enterprise ZeroTrust SOC</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
-<body class="dark-mode">
-    <div id="app">
+<body>
+    <div class="container">
         <!-- Auth View -->
-        <section id="auth-view" class="view">
-            <div class="auth-container glass">
-                <div class="auth-header">
-                    <h1>Enterprise<span>Core</span></h1>
-                    <p id="auth-subtitle">Secure Asynchronous Portal</p>
+        <div id="auth-view">
+            <div class="auth-header">
+                <div class="auth-logo">CORE_AUTH</div>
+                <p id="auth-subtitle" style="color: var(--text-dim)">Secure Asynchronous Portal</p>
+            </div>
+            
+            <div class="auth-tabs" style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                <button id="tab-login" class="btn-primary active" onclick="switchAuthMode('login')" style="margin:0; background: transparent; border: 1px solid var(--glass-border)">LOGIN</button>
+                <button id="tab-register" class="btn-primary" onclick="switchAuthMode('register')" style="margin:0; background: transparent; border: 1px solid var(--glass-border)">REGISTER</button>
+            </div>
+
+            <form id="auth-form">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" placeholder="admin@enterprise.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Access Key</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" id="submit-btn" class="btn-primary">AUTHENTICATE</button>
+            </form>
+            <div id="auth-error" class="hidden" style="color: var(--error); margin-top: 1rem; font-size: 0.8rem; text-align: center;"></div>
+        </div>
+
+        <!-- Dashboard View (SOC Layout) -->
+        <div id="dashboard-view" class="hidden">
+            <!-- Left Sidebar: System Health -->
+            <div class="panel">
+                <div class="panel-header">
+                    System Health <div class="status-indicator" id="sys-pulse"></div>
+                </div>
+                <div class="session-card">
+                    <p style="font-size: 0.75rem; color: var(--text-dim)">DATABASE</p>
+                    <p id="db-status" style="font-weight: 600">Checking...</p>
+                </div>
+                <div class="session-card">
+                    <p style="font-size: 0.75rem; color: var(--text-dim)">REDIS CLUSTER</p>
+                    <p id="redis-status" style="font-weight: 600">Checking...</p>
+                </div>
+                <div style="margin-top: auto">
+                    <button class="btn-primary" onclick="handleLogout()" style="background: rgba(239, 68, 68, 0.1); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.2)">LOGOUT SESSION</button>
+                </div>
+            </div>
+
+            <!-- Main Content: Session Center -->
+            <div class="panel">
+                <div class="panel-header">Active Session Intelligence</div>
+                <div class="session-card" style="flex: 1">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
+                        <div>
+                            <p style="font-size: 0.75rem; color: var(--text-dim)">AUTHENTICATED IDENTITY</p>
+                            <p id="user-display" style="font-size: 1.5rem; font-weight: 800; color: var(--accent)">user@enterprise.com</p>
+                        </div>
+                        <div id="user-privelege-badge" style="padding: 0.25rem 0.75rem; background: var(--accent-glow); border-radius: 20px; font-size: 0.7rem; font-weight: 800">STANDARD</div>
+                    </div>
+
+                    <div style="margin-top: 2rem;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem;">
+                            <span color="var(--text-dim)">TOKEN ROTATION REMAINING</span>
+                            <span id="ttl-seconds">900s</span>
+                        </div>
+                        <div class="ttl-bar">
+                            <div id="ttl-progress" class="ttl-progress"></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 3rem;">
+                        <p style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 1rem;">JWT PAYLOAD INSPECTOR</p>
+                        <pre id="jwt-payload" style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; color: var(--success); overflow-x: auto;"></pre>
+                    </div>
                 </div>
                 
-                <div class="tabs">
-                    <button id="tab-login" class="tab active" onclick="switchAuthMode('login')">Login</button>
-                    <button id="tab-register" class="tab" onclick="switchAuthMode('register')">Register</button>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn-primary" onclick="handleRefresh()" style="flex: 1">ROTATE KEYS</button>
                 </div>
-
-                <form id="auth-form">
-                    <div class="input-group">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" required placeholder="name@company.com">
-                    </div>
-                    <div class="input-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" required placeholder="••••••••">
-                    </div>
-                    <button type="submit" id="submit-btn" class="btn-primary">Authenticate</button>
-                </form>
-                <div id="auth-error" class="error-msg hidden"></div>
             </div>
-        </section>
 
-        <!-- Dashboard View -->
-        <section id="dashboard-view" class="view hidden">
-            <nav class="glass">
-                <div class="nav-content">
-                    <div class="logo">Core<span>OS</span></div>
-                    <div class="nav-actions">
-                        <span id="user-display"></span>
-                        <button onclick="handleLogout()" class="btn-secondary">Revoke Session</button>
+            <!-- Right Sidebar: Audit Log -->
+            <div class="panel">
+                <div class="panel-header">Security Audit Log</div>
+                <div class="audit-list" id="audit-feed">
+                    <div class="audit-item">
+                        <p class="audit-time">Just now</p>
+                        <p>Session initialized via local portal</p>
                     </div>
                 </div>
-            </nav>
-
-            <main class="dashboard-grid">
-                <div class="card glass status-card">
-                    <h3>Zero-Trust Status</h3>
-                    <div class="status-indicator">
-                        <div class="pulse-ring"></div>
-                        <span id="trust-label">SECURE</span>
-                    </div>
-                    <p>Encryption: HS256 (Enterprise Grade)</p>
-                </div>
-
-                <div class="card glass token-card">
-                    <h3>Active Session</h3>
-                    <div class="token-details">
-                        <div class="detail">
-                            <span class="label">Access Token:</span>
-                            <code id="access-preview">••••••••</code>
-                        </div>
-                        <div class="detail">
-                            <span class="label">Type:</span>
-                            <code>Bearer</code>
-                        </div>
-                    </div>
-                    <button onclick="handleRefresh()" class="btn-outline">Rotate Keys</button>
-                </div>
-
-                <div class="card glass profile-card">
-                    <h3>User Context</h3>
-                    <div id="profile-data">
-                        <div class="skeleton-text"></div>
-                        <div class="skeleton-text"></div>
-                    </div>
-                </div>
-            </main>
-        </section>
-
-        <!-- Global Toast -->
-        <div id="toast" class="toast hidden"></div>
+            </div>
+        </div>
     </div>
-    <script src="static/app.js"></script>
+
+    <div id="toast" class="hidden"></div>
+
+    <script src="/static/app.js"></script>
 </body>
 </html>

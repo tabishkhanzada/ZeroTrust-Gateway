@@ -47,6 +47,5 @@ async def logout(
     auth_service = AuthService(db)
     await auth_service.logout(token)
     return StandardActionResponse(
-        status="success",
-        message="Session revoked successfully"
+        detail="Session revoked successfully"
     )

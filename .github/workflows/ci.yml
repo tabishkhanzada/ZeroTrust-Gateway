@@ -57,7 +57,11 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run Ruff Check (Lint & Imports)
-        run: ruff check . || exit 0
+        run: ruff check .
+
+      - name: Run Bandit (SAST Security Audit)
+        run: bandit -r app/ -ll
+
       - name: Run Async Tests with Pytest
-        run: pytest app/tests/ || exit 0
+        run: pytest app/tests/
 
