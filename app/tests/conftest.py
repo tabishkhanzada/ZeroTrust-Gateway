@@ -9,8 +9,14 @@ from app.core.database import get_db
 from app.main import app
 from app.models.user import Base
 
+import os
 # Test Database
-TEST_DATABASE_URL = settings.DATABASE_URL + "_test"
+if os.getenv("GITHUB_ACTIONS"):
+    TEST_DATABASE_URL = settings.DATABASE_URL + "_test"
+else:
+    # Use SQLite for local testing to avoid Postgres setup issues
+    TEST_DATABASE_URL = "sqlite+aiosqlite:///./test.db"
+
 engine = create_async_engine(TEST_DATABASE_URL, future=True)
 TestingSessionLocal = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 
