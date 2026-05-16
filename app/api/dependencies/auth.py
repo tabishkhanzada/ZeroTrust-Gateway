@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
-from app.core.redis import RedisClient, redis_client
+from app.core.redis import RedisClient, redis_client, get_redis
 from app.exceptions.auth import (
     TokenBlacklistedException,
     TokenExpiredException,
@@ -23,7 +23,7 @@ reusable_oauth2 = OAuth2PasswordBearer(
 async def get_current_user(
     token: Annotated[str, Depends(reusable_oauth2)],
     db: Annotated[AsyncSession, Depends(get_db)],
-    redis: Annotated[RedisClient, Depends(lambda: redis_client)]
+    redis: Annotated[RedisClient, Depends(get_redis)]
 ) -> User:
     try:
         payload = jwt.decode(

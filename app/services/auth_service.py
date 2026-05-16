@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime, timezone
+import asyncio
 
 from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -97,5 +98,7 @@ class AuthService:
                 ttl = exp - now_ts
                 if ttl > 0:
                     await self.redis_client.set_with_expiry(f"blacklist:{jti}", "true", ttl)
+                    # Small pause to ensure Redis write is visible before next request
+                    await asyncio.sleep(0.1)
         except JWTError:
             raise TokenInvalidException()
